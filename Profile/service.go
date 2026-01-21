@@ -3,6 +3,7 @@ package profile
 import (
 	"context"
 	"math/rand/v2"
+	"time"
 )
 
 //we need a profile function that returns a profile name
@@ -30,6 +31,7 @@ func GetProfile(
 			case <-ctx.Done():
 				return
 			case profile <- Profile{Name: listName[rand.IntN(len(listName))]}:
+				time.Sleep(3 * time.Second)
 			}
 		}
 	}()
