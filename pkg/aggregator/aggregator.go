@@ -49,14 +49,14 @@ func (ua *UserAggregator) Aggregate(ctx context.Context, id int) {
 	dctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	//first we will try to cancel after 8
-	for i := 1; i < 10; i++ {
 
-		newProfile := profile.GetProfile(dctx)
-		newOrder := order.GetOrder(dctx)
+	newProfile := profile.GetProfile(dctx)
+	newOrder := order.GetOrder(dctx)
+	for i := 1; i < 10; i++ {
 
 		log.Printf("Iteration %d User: %v | Orders: %v", i, (<-newProfile).Name, (<-newOrder).Quantity)
 
-		if i > 8 {
+		if i == 7 {
 			log.Println("WE REACH CANCEL POINT")
 			cancel()
 			break
