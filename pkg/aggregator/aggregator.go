@@ -1,7 +1,10 @@
 package aggregator
 
 import (
+	order "concurrent-aggregator/Order"
+	profile "concurrent-aggregator/Profile"
 	"context"
+	"log"
 	"log/slog"
 	"time"
 )
@@ -9,6 +12,9 @@ import (
 type UserAggregator struct {
 	logger  slog.Logger
 	timeout time.Duration
+
+	profileService profile.Profile
+	orderService   order.Order
 }
 
 // Option is a functional option type that allows us to configure the Client.
@@ -18,9 +24,10 @@ type Option func(*UserAggregator)
 
 func NewUserAggregator(options ...Option) *UserAggregator {
 	UserAggregator := &UserAggregator{
-		logger:  slog.Logger{},
-		timeout: 30 * time.Second, //Default timeout
-
+		logger:         slog.Logger{},
+		timeout:        30 * time.Second, //Default timeout
+		profileService: profile.Profile{},
+		orderService:   order.Order{},
 	}
 
 	for _, opt := range options {
@@ -37,12 +44,23 @@ func WithTimeouts(timeout time.Duration) Option {
 
 }
 
-// func NewUserAggregator(logger slog.Logger) *UserAggregator {
-// 	return &UserAggregator{
-// 		logger: logger,
-// 	}
-// }
-
 func (ua *UserAggregator) Aggregate(ctx context.Context, id int) {
+
+	dctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	//first we will try to cancel after 8
+	for i := 1; i < 10; i++ {
+
+		newProfile := profile.GetProfile(dctx)
+		newOrder := order.GetOrder(dctx)
+
+		log.Printf("Iteration %d User: %v | Orders: %v", i, (<-newProfile).Name, (<-newOrder).Quantity)
+
+		if i > 8 {
+			log.Println("WE REACH CANCEL POINT")
+			cancel()
+			break
+		}
+	}
 
 }

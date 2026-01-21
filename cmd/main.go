@@ -1,7 +1,8 @@
-package concurrentaggregator
+package main
 
 import (
-	"pkg/aggregator/aggregator"
+	"concurrent-aggregator/pkg/aggregator"
+	"context"
 	"time"
 )
 
@@ -11,13 +12,8 @@ func main() {
 		aggregator.WithTimeouts(10 * time.Second),
 	)
 
-	// Get Profiles
+	ctx := context.TODO()
 
-	// Get Orders
+	userAgg.Aggregate(ctx, 0)
 
-	/*
-		You need to fetch these in parallel to reduce latency.
-		However, if either fails, or if the global timeout is reached,
-		the entire operation must abort immediately to save resources.
-	*/
 }
