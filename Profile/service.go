@@ -2,8 +2,8 @@ package profile
 
 import (
 	"context"
+	"fmt"
 	"math/rand/v2"
-	"time"
 )
 
 //we need a profile function that returns a profile name
@@ -25,13 +25,15 @@ func GetProfile(
 	profile := make(chan Profile)
 
 	go func() {
+
 		defer close(profile)
 		for {
 			select {
 			case <-ctx.Done():
+				fmt.Printf("error in get profile: %v", ctx.Err())
 				return
 			case profile <- Profile{Name: listName[rand.IntN(len(listName))]}:
-				time.Sleep(3 * time.Second)
+
 			}
 		}
 	}()

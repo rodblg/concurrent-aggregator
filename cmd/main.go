@@ -9,10 +9,10 @@ import (
 func main() {
 
 	userAgg := aggregator.NewUserAggregator(
-		aggregator.WithTimeouts(10 * time.Second),
+		aggregator.WithTimeouts(3 * time.Second),
 	)
 
-	ctx := context.TODO()
+	ctx := context.Background()
 
 	userAgg.Aggregate(ctx, 0)
 

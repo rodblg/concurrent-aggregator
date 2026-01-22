@@ -4,6 +4,7 @@ import (
 	order "concurrent-aggregator/Order"
 	profile "concurrent-aggregator/Profile"
 	"context"
+	"fmt"
 	"log"
 	"log/slog"
 	"time"
@@ -25,7 +26,7 @@ type Option func(*UserAggregator)
 func NewUserAggregator(options ...Option) *UserAggregator {
 	UserAggregator := &UserAggregator{
 		logger:         slog.Logger{},
-		timeout:        30 * time.Second, //Default timeout
+		timeout:        5 * time.Second, //Default timeout
 		profileService: profile.Profile{},
 		orderService:   order.Order{},
 	}
@@ -46,20 +47,28 @@ func WithTimeouts(timeout time.Duration) Option {
 
 func (ua *UserAggregator) Aggregate(ctx context.Context, id int) {
 
-	dctx, cancel := context.WithCancel(ctx)
+	dctx, cancel := context.WithTimeout(ctx, ua.timeout)
 	defer cancel()
+
 	//first we will try to cancel after 8
 
 	newProfile := profile.GetProfile(dctx)
 	newOrder := order.GetOrder(dctx)
 	for i := 1; i < 10; i++ {
 
+		select {
+		case <-dctx.Done():
+			fmt.Printf("timeout at iteration %d: %v", i, dctx.Err())
+			return
+		default:
+		}
+
 		log.Printf("Iteration %d User: %v | Orders: %v", i, (<-newProfile).Name, (<-newOrder).Quantity)
 
 		if i == 7 {
 			log.Println("WE REACH CANCEL POINT")
 			cancel()
-			break
+			return
 		}
 	}
 

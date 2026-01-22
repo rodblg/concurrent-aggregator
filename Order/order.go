@@ -2,6 +2,7 @@ package order
 
 import (
 	"context"
+	"fmt"
 	"math/rand/v2"
 )
 
@@ -22,6 +23,7 @@ func GetOrder(
 		for {
 			select {
 			case <-ctx.Done():
+				fmt.Printf("error in get order: %v", ctx.Err())
 				return
 			case order <- Order{Quantity: rand.IntN(15)}:
 			}
